@@ -3,7 +3,8 @@ context("measures")
 test_that("measures", {
   ct = binaryclass.task
   options(warn = 2)
-  mymeasure = makeMeasure(id = "foo", minimize = TRUE, properties = c("classif", "classif.multi", "regr", "predtype.response", "predtype.prob"),
+  mymeasure = makeMeasure(id = "foo", minimize = TRUE, properties = c("classif", "classif.multi",
+    "regr", "predtype.response", "predtype.prob"),
     fun = function(task, model, pred, feats, extra.args) {
       tt = pred
       1
@@ -19,9 +20,11 @@ test_that("measures", {
   rdesc = makeResampleDesc("Holdout", split = 0.2)
   r = resample(lrn, ct, rdesc, measures = ms)
   expect_equal(names(r$measures.train),
-    c("iter", "mmce", "acc", "bac", "tp", "fp", "tn", "fn", "tpr", "fpr", "tnr", "fnr", "ppv", "npv", "mcc", "f1", "foo"))
+    c("iter", "mmce", "acc", "bac", "tp", "fp", "tn", "fn", "tpr", "fpr", "tnr",
+      "fnr", "ppv", "npv", "mcc", "f1", "foo"))
   expect_equal(names(r$measures.test),
-    c("iter", "mmce", "acc", "bac", "tp", "fp", "tn", "fn", "tpr", "fpr", "tnr", "fnr", "ppv", "npv", "mcc", "f1", "foo"))
+    c("iter", "mmce", "acc", "bac", "tp", "fp", "tn", "fn", "tpr", "fpr", "tnr",
+      "fnr", "ppv", "npv", "mcc", "f1", "foo"))
 
   # test that measures work for se
   ms = list(mse, timetrain, timepredict, timeboth, featperc)
@@ -35,7 +38,8 @@ test_that("measures", {
   lrn = makeLearner("classif.randomForest", predict.type = "prob")
   mod = train(lrn, task = multiclass.task, subset = multiclass.train.inds)
   pred = predict(mod, task = multiclass.task, subset = multiclass.test.inds)
-  perf = performance(pred, measures = multiclass.auc)
+  perf = performance(pred, measures = list(multiclass.aunu, multiclass.aunp,
+    multiclass.au1u, multiclass.au1p))
   expect_is(perf, "numeric")
 
   # test survival measure
@@ -151,7 +155,7 @@ test_that("check measure calculations", {
   lrn.surv = makeLearner("surv.coxph")
   # lm does not converge due to small data and warns
   suppressWarnings({
-  mod.surv = train(lrn.surv, task.surv)
+    mod.surv = train(lrn.surv, task.surv)
   })
   pred.surv = predict(mod.surv, task.surv)
   pred.surv$data[,"response"] = pred.art.surv
@@ -245,33 +249,10 @@ test_that("check measure calculations", {
   acc.perf = performance(pred.classif, measures = acc, model = mod.classif)
   expect_equal(acc.test, acc$fun(pred = pred.classif))
   expect_equal(acc.test, as.numeric(acc.perf))
-  #multiclass.brier
-  multiclass.brier.test = mean(rowSums((getPredictionProbabilities(pred.classif) - matrix(c(0,0,1,0,1,0,0,1,0,1,0,0), 4, 3))^2))
-  multiclass.brier.perf = performance(pred.classif, measures = multiclass.brier, model = mod.classif)
-  expect_equal(multiclass.brier.test, multiclass.brier$fun(pred = pred.classif))
-  expect_equal(multiclass.brier.test, as.numeric(multiclass.brier.perf))
   #multiclass.auc
-  n.cl = length(levels(tar.classif))
-  pred.probs = getPredictionProbabilities(pred.classif)
-  predictor = vnapply(1:length(pred.art.classif), function(i) {
-    pred.probs[i, pred.art.classif[i]]
-  })
-  names(predictor) = pred.art.classif
-  level.grid = t(combn(as.numeric(levels(tar.classif)), m = 2L))
-  level.grid = rbind(level.grid, level.grid[, ncol(level.grid):1])
-  aucs = numeric(nrow(level.grid))
-  for (i in 1:nrow(level.grid)){
-    ranks = sort(rank(predictor[names(predictor) %in% level.grid[i, ]]))
-    ranks = ranks[names(ranks) == level.grid[i]]
-    n = length(ranks)
-    ranks.sum = sum(ranks)
-    aucs[i] = ranks.sum - n * (n + 1) / 2
-  }
-  multiclass.auc.test = 1 / (n.cl * (n.cl - 1)) * sum(aucs)
-  multiclass.auc.perf = performance(pred.classif,
-   measures = multiclass.auc, model = mod.classif)
-  expect_equal(multiclass.auc.test, multiclass.auc$fun(pred = pred.classif))
-  expect_equal(multiclass.auc.test, as.numeric(multiclass.auc.perf))
+  expect_equal(as.numeric(performance(pred.bin, measures = list(multiclass.aunu,
+    multiclass.aunp, multiclass.au1u, multiclass.au1p))), 
+    as.numeric(rep(performance(pred.bin, measures = auc), 4)))
 
   #test binaryclass measures
 
@@ -338,7 +319,7 @@ test_that("check measure calculations", {
   expect_equal(fdr.test, as.numeric(fdr.perf))
   #bac
   bac.test = 0.5 * (tpr.test / (tpr.test + fnr.test) + tnr.test /
-    (tnr.test + fpr.test))
+      (tnr.test + fpr.test))
   bac.perf = performance(pred.bin, measures = bac, model = mod.bin)
   expect_equal(bac.test, bac$fun(pred = pred.bin))
   expect_equal(bac.test, as.numeric(bac.perf))
@@ -355,8 +336,8 @@ test_that("check measure calculations", {
   #mcc
   mcc.test =  (tp.test * tn.test - fp.test * fn.test) /
     sqrt((tp.test + fp.test) * (tp.test + fn.test) *
-      (tn.test + fp.test) * (tn.test + fn.test))
-   mcc.perf = performance(pred.bin, measures = mcc, model = mod.bin)
+        (tn.test + fp.test) * (tn.test + fn.test))
+  mcc.perf = performance(pred.bin, measures = mcc, model = mod.bin)
   expect_equal(mcc.test, mcc$fun(pred = pred.bin))
   expect_equal(mcc.test, as.numeric(mcc.perf))
   #f1
@@ -379,14 +360,14 @@ test_that("check measure calculations", {
 
   #hamloss
   hamloss.test = mean(c(tar1.multilabel != pred.multilabel$data[, 4L],
-      tar2.multilabel != pred.multilabel$data[, 5L]))
+    tar2.multilabel != pred.multilabel$data[, 5L]))
   hamloss.perf = performance(pred.multilabel,
-   measures = hamloss, model = mod.multilabel)
+    measures = hamloss, model = mod.multilabel)
   expect_equal(hamloss.test, hamloss$fun(pred = pred.multilabel))
   expect_equal(hamloss.test, as.numeric(hamloss.perf))
-
+  
   #test survival measures
-
+  
   #cindex
   pos = pred.surv$data[pred.surv$data$truth.event == TRUE, "response"]
   neg = pred.surv$data[pred.surv$data$truth.event == FALSE, "response"]
@@ -403,7 +384,7 @@ test_that("check measure calculations", {
   #meancosts
   meancosts.test = (0 + 0 + 0 + 1) / 4L
   meancosts.perf = performance(pred.costsens, measures = meancosts,
-   model = mod.costsens, task = task.costsens)
+    model = mod.costsens, task = task.costsens)
   expect_equal(meancosts.test,
     meancosts$fun(pred = pred.costsens, task = task.costsens))
   expect_equal(meancosts.test, as.numeric(meancosts.perf))
@@ -420,13 +401,13 @@ test_that("check measure calculations", {
   c2 = c(3, 1)
   c1 = c((1 + 2 + 4) / 3, (3 + 4 + 2) / 3)
   s1 = sqrt((sum((data.cluster[1, ] - c1)^2) + sum((data.cluster[2, ] - c1)^2) +
-    sum((data.cluster[4, ] - c1)^2)) / 3L)
+      sum((data.cluster[4, ] - c1)^2)) / 3L)
   M = sqrt(sum((c2 - c1)^2))
   db.test = s1 / M
   db.perf = performance(pred.cluster, measures = db,
     model = mod.cluster, feats = data.cluster)
   expect_equal(db.test,db$fun(task = task.cluster,
-   pred = pred.cluster, feats = data.cluster))
+    pred = pred.cluster, feats = data.cluster))
   expect_equal(db.test, as.numeric(db.perf))
   #dunn
   exdist = min(sqrt(sum((c(1, 3) - c(3, 1))^2)), sqrt(sum((c(2, 4) - c(3, 1))^2)),
@@ -456,10 +437,10 @@ test_that("check measure calculations", {
   c1.dists = unique(as.vector(dists [-3L, -3L]))
   c1.dists = c1.dists[c1.dists != 0L]
   con.pairs = vapply(c1.dists, function(x) x < c2.dists,
-   logical(length = length(c2.dists)))
+    logical(length = length(c2.dists)))
   con.pairs = sum(rowSums(con.pairs))
   dis.pairs = vapply(c2.dists, function(x) x < c1.dists,
-   logical(length = length(c1.dists)))
+    logical(length = length(c1.dists)))
   dis.pairs = sum(rowSums(dis.pairs))
   g2.test = (con.pairs - dis.pairs) / (con.pairs + dis.pairs)
   g2.perf = performance(pred.cluster, measures = G2,

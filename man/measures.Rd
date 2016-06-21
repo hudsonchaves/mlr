@@ -29,7 +29,11 @@
 \alias{mcp}
 \alias{meancosts}
 \alias{measureACC}
+\alias{measureAU1P}
+\alias{measureAU1U}
 \alias{measureAUC}
+\alias{measureAUNP}
+\alias{measureAUNU}
 \alias{measureBAC}
 \alias{measureBrier}
 \alias{measureEXPVAR}
@@ -47,7 +51,6 @@
 \alias{measureMEDSE}
 \alias{measureMMCE}
 \alias{measureMSE}
-\alias{measureMulticlassBrier}
 \alias{measureNPV}
 \alias{measurePPV}
 \alias{measureRMSE}
@@ -63,8 +66,10 @@
 \alias{medse}
 \alias{mmce}
 \alias{mse}
-\alias{multiclass.auc}
-\alias{multiclass.brier}
+\alias{multiclass.au1p}
+\alias{multiclass.au1u}
+\alias{multiclass.aunp}
+\alias{multiclass.aunu}
 \alias{npv}
 \alias{ppv}
 \alias{rmse}
@@ -138,11 +143,21 @@ measureACC(truth, response)
 
 ber
 
-multiclass.auc
+multiclass.aunu
 
-multiclass.brier
+measureAUNU(probabilities, truth)
 
-measureMulticlassBrier(probabilities, truth)
+multiclass.aunp
+
+measureAUNP(probabilities, truth)
+
+multiclass.au1u
+
+measureAU1U(probabilities, truth)
+
+multiclass.au1p
+
+measureAU1P(probabilities, truth)
 
 auc
 
