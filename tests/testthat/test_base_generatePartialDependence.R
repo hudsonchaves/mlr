@@ -173,6 +173,12 @@ test_that("generatePartialDependenceData", {
   plotPartialDependence(tfr, geom = "tile", facet = "chas")
   tfs = generatePartialDependenceData(fs, surv.df, c("x1", "x2"), interaction = TRUE)
   plotPartialDependence(tfs, geom = "tile")
+
+  # facetting works with plotPartialDependence:
+  q = plotPartialDependence(dr, facet.wrap.nrow = 2L)
+  testFacetting(q, 2L)
+  q = plotPartialDependence(dr, facet.wrap.ncol = 2L)
+  testFacetting(q, ncol = 2L)
 })
 
 test_that("generateFeatureGrid", {

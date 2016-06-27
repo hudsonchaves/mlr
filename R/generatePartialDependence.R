@@ -449,13 +449,14 @@ print.PartialDependenceData = function(x, ...) {
 #'   Note that if any of the elements of the \code{features} argument of \code{\link{generatePartialDependenceData}}
 #'   are factors, they will be coerced to numerics.
 #'   Default is \code{NULL}.
+#' @template arg_facet_nrow_ncol
 #' @param p [\code{numeric(1)}]\cr
 #'   If \code{individual = TRUE} then \code{sample} allows the user to sample without replacement
 #'   from the output to make the display more readable. Each row is sampled with probability \code{p}.
 #'   Default is \code{1}.
 #' @template ret_gg2
 #' @export
-plotPartialDependence = function(obj, geom = "line", facet = NULL, p = 1) {
+plotPartialDependence = function(obj, geom = "line", facet = NULL, facet.wrap.nrow = NULL, facet.wrap.ncol = NULL, p = 1) {
   assertClass(obj, "PartialDependenceData")
   if (length(obj$features) > 2L & geom != "tile" & obj$interaction)
     stop("To plot more than 2 features geom must be 'tile'!")
@@ -548,8 +549,10 @@ plotPartialDependence = function(obj, geom = "line", facet = NULL, p = 1) {
     }
   }
 
-  if (!is.null(facet))
-    plt = plt + facet_wrap(as.formula(stri_paste("~", facet)), scales = scales)
+  if (!is.null(facet)) {
+    plt = plt + facet_wrap(as.formula(stri_paste("~", facet)), scales = scales,
+      nrow = facet.wrap.nrow, ncol = facet.wrap.ncol)
+  }
 
   plt
 }
