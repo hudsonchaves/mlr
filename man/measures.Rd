@@ -53,6 +53,7 @@
 \alias{measureMEDSE}
 \alias{measureMMCE}
 \alias{measureMSE}
+\alias{measureMulticlassBrier}
 \alias{measureNPV}
 \alias{measurePPV}
 \alias{measureRMSE}
@@ -72,6 +73,7 @@
 \alias{multiclass.au1u}
 \alias{multiclass.aunp}
 \alias{multiclass.aunu}
+\alias{multiclass.brier}
 \alias{npv}
 \alias{ppv}
 \alias{rmse}
@@ -160,6 +162,10 @@ measureAU1U(probabilities, truth)
 multiclass.au1p
 
 measureAU1P(probabilities, truth)
+
+multiclass.brier
+
+measureMulticlassBrier(probabilities, truth)
 
 logloss
 
