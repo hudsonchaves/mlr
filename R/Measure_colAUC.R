@@ -1,4 +1,9 @@
-# mainly copied from the caTools package
+# colAUC calculates for a vector with true values the Area Under the ROC Curve (AUC) for a matrix of probabilities. 
+# Matrix rows contain samples while the columns contain features/variables. 
+# The function is used to calculate the for different multiclass AUC measures AU1P, AU1U, AUNP, AUNU,
+# following the definition in the Ferri et. al Paper: 
+# https://www.math.ucdavis.edu/~saito/data/roc/ferri-class-perf-metrics.pdf
+
 colAUC = function(probabilities, truth) {
   y = as.factor(truth)
   X = as.matrix(probabilities)
